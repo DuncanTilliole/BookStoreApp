@@ -81,11 +81,11 @@ namespace BookStoreApp.API.Controllers
                 var author = _mapper.Map<Author>(authorDTO);
                 if (ModelState.IsValid)
                 {
-                    _context.Add(author);
+                    _context.Authors.Add(author);
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
                 }
-                return Ok(author);
+                return StatusCode(500, Messages.Error500Message);
             }
             catch (Exception ex)
             {
@@ -124,7 +124,7 @@ namespace BookStoreApp.API.Controllers
                     await _context.SaveChangesAsync();
                     return Ok(existingAuthor);
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (Exception ex)
                 {
                     // Handle concurrency conflicts if necessary
                     _logger.LogError(ex, $"Error performing in {nameof(Edit)}");
@@ -146,7 +146,7 @@ namespace BookStoreApp.API.Controllers
                 _context.Authors.Remove(author);
 
                 await _context.SaveChangesAsync();
-                return Ok("La ressource à été supprimée");
+                return Ok(Messages.Delete200Message);
             }
             return NotFound();
         }
