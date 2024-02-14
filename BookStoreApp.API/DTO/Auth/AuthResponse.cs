@@ -1,11 +1,13 @@
-﻿namespace BookStoreApp.API.DTO.Auth
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace BookStoreApp.API.DTO.Auth
 {
     public class AuthResponse
     {
-        public string UserId { get; set; }
+        public required string UserId { get; set; }
 
-        public string Token { get; set; }
+        public required string Token { get; set; }
 
-        public string Email { get; set; }
+        public required string Email { get; set; }
     }
 }

@@ -10,6 +10,7 @@ using AutoMapper;
 using BookStoreApp.API.DTO.Book;
 using AutoMapper.QueryableExtensions;
 using BookStoreApp.API.Statics;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookStoreApp.API.Controllers
 {
@@ -63,6 +64,7 @@ namespace BookStoreApp.API.Controllers
 
         // POST: Books/Create
         [HttpPost("Create")]
+        [Authorize]
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         public async Task<IActionResult> Create([FromBody] BookCreateDTO bookDTO)
@@ -85,6 +87,7 @@ namespace BookStoreApp.API.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPut("Edit/{id:int}")]
+        [Authorize]
         public async Task<IActionResult> Edit(int id, [FromBody] BookUpdateDTO bookDTO)
         {
             if (id != bookDTO.Id)
@@ -119,6 +122,7 @@ namespace BookStoreApp.API.Controllers
 
         // POST: Books/Delete/5
         [HttpDelete("Delete/{id:int}")]
+        [Authorize]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var book = await _context.Books.FindAsync(id);

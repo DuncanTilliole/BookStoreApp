@@ -48,7 +48,7 @@ public partial class BookStoreDbContext : IdentityDbContext<ApiUser>
                 NormalizedUserName = "JOHN.DOE@GMAIL.COM",
                 FirstName = "John",
                 LastName = "Doe",
-                PasswordHash = hasher.HashPassword(null, "Testing123+")
+                PasswordHash = hasher.HashPassword(null!, "Testing123+")
             },
             new ApiUser
             {
@@ -59,7 +59,7 @@ public partial class BookStoreDbContext : IdentityDbContext<ApiUser>
                 NormalizedUserName = "ADMIN@GMAIL.COM",
                 FirstName = "System",
                 LastName = "Admin",
-                PasswordHash = hasher.HashPassword(null, "Testing123+")
+                PasswordHash = hasher.HashPassword(null!, "Testing123+")
             }
         );
 

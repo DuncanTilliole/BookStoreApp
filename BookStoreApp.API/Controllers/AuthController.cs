@@ -64,12 +64,19 @@ namespace BookStoreApp.API.Controllers
             try
             {
                 ApiUser? user = await _userManager.FindByEmailAsync(userDTO.Email);
-                var passwordValid = await _userManager.CheckPasswordAsync(user, userDTO.Password);
 
-                if (user == null || !passwordValid)
+                if (user == null)
                 {
                     return NotFound();
                 }
+
+                bool passwordValid = await _userManager.CheckPasswordAsync(user, userDTO.Password);
+
+                if (!passwordValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
 
                 string tokenString = await GenerateToken(user);
 
@@ -92,23 +99,23 @@ namespace BookStoreApp.API.Controllers
 
         private async Task<string> GenerateToken(ApiUser user)
         {
-            SymmetricSecurityKey? securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"]));
-            SigningCredentials? credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"]!));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            IList<string> roles = await _userManager.GetRolesAsync(user);
-            List<Claim>? roleClaims =  roles.Select(q => new Claim(ClaimTypes.Role, q)).ToList();
-
-            IList<Claim>? userClaims = await _userManager.GetClaimsAsync(user);
+            var roles = await _userManager.GetRolesAsync(user);
+            var roleClaims = roles.Select(q => new Claim(ClaimTypes.Role, q)).ToList();
+            var userClaims = await _userManager.GetClaimsAsync(user);
 
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(CustomClaimTypes.Uid, user.Id)
+                new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Email, user.Email),
             }
-            .Union(roleClaims)
-            .Union(userClaims);
+            .Union(userClaims)
+            .Union(roleClaims);
 
             var token = new JwtSecurityToken(
                 issuer: _configuration["JwtSettings:Issuer"],
