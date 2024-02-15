@@ -1,0 +1,39 @@
+.navbar-toggler {
+    appearance: none;
+    cursor: pointer;
+    width: 3.5rem;
+    height: 2.5rem;
+    color: white;
+    border: none; /* Supprimer la bordure pour un style plus propre */
+    background: transparent; /* Arrière-plan transparent */
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+.navbar-toggler:focus {
+    outline: none; /* Supprimer la mise au point bleue sur le focus */
+}
+
+.navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.navbar-brand {
+    font-size: 1.2rem; /* Taille de police légèrement augmentée */
+}
+
+.navbar-nav .nav-item {
+    margin-right: 10px; /* Ajouter un espace entre les éléments de la barre de navigation */
+}
+
+.nav-link {
+    padding: 0.5rem 1rem; /* Ajouter un padding aux liens */
+}
+
+@media (max-width: 991.98px) {
+    .navbar-nav {
+        margin-left: auto; /* Déplacer les éléments du côté droit de la barre de navigation */
+    }
+}

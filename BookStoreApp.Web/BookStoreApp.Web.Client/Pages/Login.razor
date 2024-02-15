@@ -1,0 +1,65 @@
+﻿@page "/login"
+@rendermode InteractiveAuto
+@inject NavigationManager NavigationManager
+
+@using System.Net.Http
+@using System.Text.Json
+@using System.Text
+
+<PageTitle>Login</PageTitle>
+
+<h1>Login</h1>
+
+<div class="card-body">
+    @if (registrationError != null)
+    {
+        <p class="text-danger">@registrationError</p>
+    }
+    <EditForm Model="LoginModel" OnValidSubmit="HandleLogin" FormName="loginForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="form-group">
+            <label for="email">Email</label>
+            <InputText class="form-control" @bind-Value="LoginModel.Email" />
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <InputText class="form-control" @bind-Value="LoginModel.Password" />
+        </div>
+        <br />
+        <button class="btn btn-primary" type="submit">Login</button>
+    </EditForm>
+</div>
+
+@code {
+    private HttpClient httpClient = new HttpClient();
+    private string registrationError;
+    private UserToLoginDTO LoginModel { get; set; } = new UserToLoginDTO();
+
+
+    private async Task HandleLogin()
+    {
+        try
+        {
+            var client = new HttpClient();
+            var json = JsonSerializer.Serialize(LoginModel);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync("https://localhost:7003/Auth/Login", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                registrationError = "Well-done!";
+            }
+            else
+            {
+                registrationError = "Failed to register user";
+            }
+        }
+        catch (Exception ex)
+        {
+            registrationError = $"Error Server, try again later : {ex}";
+        }
+    }
+
+}

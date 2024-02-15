@@ -1,0 +1,82 @@
+﻿@page "/register"
+@rendermode InteractiveAuto
+@inject NavigationManager NavigationManager
+
+@using System.Net.Http
+@using System.Text.Json
+@using System.Text
+
+<PageTitle>Register new account</PageTitle>
+
+<h1>Register</h1>
+
+<div class="card-body">
+    @if (registrationError != null)
+    {
+        <p class="text-danger">@registrationError</p>
+    }
+    <EditForm Model="RegistrationModel" OnValidSubmit="HandleRegistration" FormName="registrationForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="form-group">
+            <label for="firstname">First name</label>
+            <InputText class="form-control" @bind-Value="RegistrationModel.FirstName"/>
+        </div>
+        <div class="form-group">
+            <label for="lastname">Last Name</label>
+            <InputText class="form-control" @bind-Value="RegistrationModel.LastName"/>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <InputText class="form-control" @bind-Value="RegistrationModel.Email" />
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <InputText class="form-control" @bind-Value="RegistrationModel.Password" />
+        </div>
+        <div class="form-group">
+            <label for="confirm-password">Confirm Password</label>
+            <InputText class="form-control" @bind-Value="RegistrationModel.ConfirmPassword" />
+        </div>
+        <br />
+        <button class="btn btn-primary" type="submit">Sign in</button>
+    </EditForm>
+</div>
+
+@code {
+    private HttpClient httpClient = new HttpClient();
+    private string registrationError;
+    private UserToRegisterDTO RegistrationModel { get; set; } = new UserToRegisterDTO();
+
+    /**
+     * Registration of a new user
+    */
+    private async Task HandleRegistration()
+    {
+        RegistrationModel.UserName = RegistrationModel.Email;
+        RegistrationModel.Role = "User";
+        try
+        {
+            var client = new HttpClient();
+            var json = JsonSerializer.Serialize(RegistrationModel);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync("https://localhost:7003/Auth/Register", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                NavigationManager.NavigateTo("/login");
+            }
+            else
+            {
+                registrationError = "Failed to register user";
+            }
+        }
+        catch (Exception ex)
+        {
+
+            registrationError = $"Error Server, try again later : {ex}";
+        }
+    }
+
+}
