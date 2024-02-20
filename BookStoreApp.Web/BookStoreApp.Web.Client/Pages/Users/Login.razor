@@ -1,19 +1,24 @@
 ﻿@page "/login"
-@rendermode InteractiveAuto
+@attribute [AllowAnonymous]
+@rendermode InteractiveServer
+
 @inject NavigationManager NavigationManager
+@inject IAuthenticationService AuthService
 
 @using System.Net.Http
 @using System.Text.Json
 @using System.Text
+@using BookStoreApp.Shared.Services
+@using Microsoft.AspNetCore.Authorization
 
 <PageTitle>Login</PageTitle>
 
 <h1>Login</h1>
 
 <div class="card-body">
-    @if (registrationError != null)
+    @if (RegistrationError != null)
     {
-        <p class="text-danger">@registrationError</p>
+        <p class="text-danger">@RegistrationError</p>
     }
     <EditForm Model="LoginModel" OnValidSubmit="HandleLogin" FormName="loginForm">
         <DataAnnotationsValidator />
@@ -33,32 +38,21 @@
 
 @code {
     private HttpClient httpClient = new HttpClient();
-    private string registrationError;
+    private string RegistrationError = null!;
     private UserToLoginDTO LoginModel { get; set; } = new UserToLoginDTO();
-
 
     private async Task HandleLogin()
     {
-        try
+        ResponseAPI response = await AuthService.AuthenticateAsync(LoginModel);
+
+        if (response.IsValidate)
         {
-            var client = new HttpClient();
-            var json = JsonSerializer.Serialize(LoginModel);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var response = await client.PostAsync("https://localhost:7003/Auth/Login", content);
-
-            if (response.IsSuccessStatusCode)
-            {
-                registrationError = "Well-done!";
-            }
-            else
-            {
-                registrationError = "Failed to register user";
-            }
+            NavigationManager.NavigateTo("");
         }
-        catch (Exception ex)
+        else
         {
-            registrationError = $"Error Server, try again later : {ex}";
+            // Display the error message
+            RegistrationError = response.ResponseBody;
         }
     }
 

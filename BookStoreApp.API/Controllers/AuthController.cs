@@ -42,7 +42,7 @@ namespace BookStoreApp.API.Controllers
                     {
                         ModelState.AddModelError(error.Code, error.Description);
                     }
-                    return BadRequest(ModelState);
+                    return BadRequest("Registration failed. Please check the provided information.");
                 }
 
                 await _userManager.AddToRoleAsync(user, userDTO.Role);
@@ -67,14 +67,14 @@ namespace BookStoreApp.API.Controllers
 
                 if (user == null)
                 {
-                    return NotFound();
+                    return BadRequest("Invalid username or password. Please try again.");
                 }
 
                 bool passwordValid = await _userManager.CheckPasswordAsync(user, userDTO.Password);
 
                 if (!passwordValid)
                 {
-                    return BadRequest(ModelState);
+                    return BadRequest("Invalid username or password. Please try again.");
                 }
 
 
@@ -111,8 +111,8 @@ namespace BookStoreApp.API.Controllers
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()),
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Name, user.UserName!),
+                new Claim(ClaimTypes.Email, user.Email!),
             }
             .Union(userClaims)
             .Union(roleClaims);

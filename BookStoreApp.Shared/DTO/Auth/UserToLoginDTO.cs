@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BookStoreApp.Web
+namespace BookStoreApp.Shared
 {
     public class UserToLoginDTO
     {

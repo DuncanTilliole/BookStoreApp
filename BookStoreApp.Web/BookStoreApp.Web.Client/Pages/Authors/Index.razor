@@ -1,0 +1,45 @@
+﻿@page "/authors"
+@inject IAuthorsService AuthorsService
+@rendermode InteractiveServer
+
+<h3>Index</h3>
+
+@if(authors == null)
+{
+    <div class="alert alert-info">
+        <h4>Loading datas...</h4>
+    </div>
+}
+else
+{
+    <a href="/authors/create">Create</a>
+    <br/>
+    <table class="table table-responsive">
+        <thead>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var author in authors)
+            {
+                <tr>
+                    <th>@author.FirstName</th>
+                    <th>@author.LastName</th>
+                    <th>@author.Bio</th>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Author> authors;
+
+    protected async override Task OnInitializedAsync()
+    {
+        authors = await AuthorsService.GetAuthors();
+    }
+}

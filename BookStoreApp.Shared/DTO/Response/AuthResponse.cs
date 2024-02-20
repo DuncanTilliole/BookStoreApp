@@ -2,7 +2,7 @@
 
 using System.Text.Json.Serialization;
 
-namespace BookStoreApp.API.DTO.Auth
+namespace BookStoreApp.Shared.DTO.Response
 {
     public class AuthResponse
     {

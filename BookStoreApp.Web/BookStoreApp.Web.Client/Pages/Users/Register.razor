@@ -1,10 +1,12 @@
 ﻿@page "/register"
-@rendermode InteractiveAuto
+@rendermode InteractiveServer
 @inject NavigationManager NavigationManager
+@inject IAuthenticationService AuthService
 
 @using System.Net.Http
 @using System.Text.Json
 @using System.Text
+@using BookStoreApp.Shared.Services
 
 <PageTitle>Register new account</PageTitle>
 
@@ -45,7 +47,7 @@
 
 @code {
     private HttpClient httpClient = new HttpClient();
-    private string registrationError;
+    private string registrationError = string.Empty;
     private UserToRegisterDTO RegistrationModel { get; set; } = new UserToRegisterDTO();
 
     /**
@@ -55,27 +57,16 @@
     {
         RegistrationModel.UserName = RegistrationModel.Email;
         RegistrationModel.Role = "User";
-        try
+
+        ResponseAPI response = await AuthService.RegisterAsync(RegistrationModel);
+
+        if (response.IsValidate)
         {
-            var client = new HttpClient();
-            var json = JsonSerializer.Serialize(RegistrationModel);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var response = await client.PostAsync("https://localhost:7003/Auth/Register", content);
-
-            if (response.IsSuccessStatusCode)
-            {
-                NavigationManager.NavigateTo("/login");
-            }
-            else
-            {
-                registrationError = "Failed to register user";
-            }
+            NavigationManager.NavigateTo("/login");
         }
-        catch (Exception ex)
+        else
         {
-
-            registrationError = $"Error Server, try again later : {ex}";
+            registrationError = response.ResponseBody;
         }
     }
 

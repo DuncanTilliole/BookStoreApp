@@ -1,5 +1,9 @@
-using BookStoreApp.Web.Client.Pages;
+using Blazored.LocalStorage;
+using BookStoreApp.Shared.Providers;
+using BookStoreApp.Shared.Services.Authentication;
+using BookStoreApp.Shared.Services.Authors;
 using BookStoreApp.Web.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +12,20 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IAuthorsService, AuthorsService>();
+builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
+builder.Services.AddScoped<CookiesEvents>();
+
+builder.Services.ConfigureApplicationCookie(opt =>
+{
+    opt.EventsType = typeof(CookiesEvents);
+});
+
 builder.Services.AddHttpClient();
+
+builder.Services.AddBlazoredLocalStorage();
 
 var app = builder.Build();
 
@@ -34,4 +51,4 @@ app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(BookStoreApp.Web.Client._Imports).Assembly);
 
-app.Run();
+await app.RunAsync();
