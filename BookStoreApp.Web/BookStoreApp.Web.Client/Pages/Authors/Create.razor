@@ -1,0 +1,38 @@
+﻿@page "/authors/create"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = Roles.Admin)]
+
+@inject IAuthorsService authorsService
+@inject NavigationManager NavigationManager
+
+<h3>Create a new author</h3>
+<EditForm Model="Author" OnValidSubmit="HandleCreateAuthor">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+    <div class="form-group">
+        <label for="email">First name</label>
+        <InputText class="form-control" @bind-Value="Author.FirstName" />
+    </div>
+    <div class="form-group">
+        <label for="password">Last name</label>
+        <InputText class="form-control" @bind-Value="Author.LastName" />
+    </div>
+    <div class="form-group">
+        <label for="password">Bio</label>
+        <InputText class="form-control" @bind-Value="Author.Bio" />
+    </div>
+    <br />
+    <button class="btn btn-primary" type="submit">Create author</button>
+</EditForm>
+
+@code {
+    private AuthorCreateDTO Author = new AuthorCreateDTO();
+
+    private async Task HandleCreateAuthor()
+    {
+        Response<int> response = await authorsService.CreateAuthor(Author);
+
+        if (response.Success)
+            NavigationManager.NavigateTo("/authors");
+    }
+}

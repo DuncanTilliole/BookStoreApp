@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BookStoreApp.API.Data;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using BookStoreApp.API.DTO.Author;
 using AutoMapper;
 using BookStoreApp.API.Statics;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.IdentityModel.Tokens;
 
 namespace BookStoreApp.API.Controllers
 {
@@ -49,20 +42,16 @@ namespace BookStoreApp.API.Controllers
         [HttpGet("Details/{id:int}")]
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             try
             {
                 var author = await _context.Authors
-                .FirstOrDefaultAsync(m => m.Id == id);
-                if (author == null)
-                {
-                    return NotFound();
-                }
+                    .Include(author => author.Books)
+                    .FirstOrDefaultAsync(m => m.Id == id);
 
+                if (author == null) return NotFound();
+                
                 return Ok(author);
             }
             catch (Exception ex)
@@ -76,7 +65,7 @@ namespace BookStoreApp.API.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost("Create")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] AuthorCreateDTO authorDTO)
         {
             try
@@ -101,7 +90,7 @@ namespace BookStoreApp.API.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPut("Edit/{id:int}")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, [FromBody] AuthorUpdateDTO authorDTO)
         {
             var author = _mapper.Map<Author>(authorDTO);
@@ -142,7 +131,7 @@ namespace BookStoreApp.API.Controllers
 
         // DELETE: Authors/Delete/5
         [HttpDelete("Delete/{id:int}")]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var author = await _context.Authors.FindAsync(id);

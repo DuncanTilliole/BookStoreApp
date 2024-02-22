@@ -1,10 +1,13 @@
-﻿namespace BookStoreApp.Shared.Services.Authentication
+﻿using BookStoreApp.Shared.Bases;
+using BookStoreApp.Shared.DTO.Response;
+
+namespace BookStoreApp.Shared.Services.Authentication
 {
     public interface IAuthenticationService
     {
-        Task<ResponseAPI> AuthenticateAsync(UserToLoginDTO user);
+        Task<Response<string>> AuthenticateAsync(UserToLoginDTO user);
 
-        Task<ResponseAPI> RegisterAsync(UserToRegisterDTO user);
+        Task<Response<string>> RegisterAsync(UserToRegisterDTO user);
 
         Task<bool> Logout();
     }

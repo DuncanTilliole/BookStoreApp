@@ -1,0 +1,75 @@
+﻿@page "/authors/details/{id:int}"
+@rendermode InteractiveAuto
+@using AutoMapper;
+@inject IAuthorsService authorsService
+@inject NavigationManager NavigationManager
+@inject IMapper Mapper
+
+<h3>Details Author</h3>
+
+<EditForm Model="Author">
+    <fieldset disabled="true">
+        <div class="form-group">
+            <label for="firstname">First name</label>
+            <InputText class="form-control" @bind-Value="Author.FirstName" />
+        </div>
+        <br />
+        <div class="form-group">
+            <label for="lastname">Last name</label>
+            <InputText class="form-control" @bind-Value="Author.LastName" />
+        </div>
+        <br />
+        <div class="form-group">
+            <label for="bio">Bio</label>
+            <InputText class="form-control" @bind-Value="Author.Bio" />
+        </div>
+        <br />
+    </fieldset>
+
+    @if(Author.Books == null || Author.Books.Any() == false)
+    {
+        <div class="alert alert-dismissible alert-secondary">
+            No Books for this author.
+        </div>
+        <br />
+    }
+    else
+    {
+        <label for="bio">Livres :</label>
+        <div class="d-flex flex-nowrap overflow-auto">
+            @foreach(var book in Author.Books)
+            {
+                <div class="card" style="width: 18rem; margin-right: 10px;">
+                <img src="@($"https://localhost:7003{book.Image}")" class="card-img-top" alt="@book.Title">
+                <div class="card-body">
+                    <h5 class="card-title">@book.Title</h5>
+                    <p class="card-text">@book.Summary</p>
+                    <a href="#" class="btn btn-primary">@book.Price €</a>
+                </div>
+            </div>
+            }
+        </div>
+    }
+    <br />
+    <button class="btn btn-primary" @onclick="HandleNavigateToEdit">Go to Edit</button>
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    private Author Author = new Author();
+
+    protected async override Task OnInitializedAsync()
+    {
+        var response = await authorsService.GetAuthor(id);
+        if (response.Success) Author = response.Datas;
+
+    }
+
+    private void HandleNavigateToEdit()
+    {
+        NavigationManager.NavigateTo($"/authors/update/{id}");
+    }
+}

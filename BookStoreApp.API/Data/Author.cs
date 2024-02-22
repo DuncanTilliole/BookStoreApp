@@ -1,13 +1,15 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BookStoreApp.API.Data;
 
-public partial class Author
+public class Author
 {
+    public Author()
+    {
+        Books = new HashSet<Book>();
+    }
+
     [JsonProperty("id")]
     public int Id { get; set; }
 
@@ -24,5 +26,5 @@ public partial class Author
     public string? Bio { get; set; }
 
     [JsonProperty("books")]
-    public virtual ICollection<Book> Books { get; set; } = new List<Book>();
+    public virtual ICollection<Book> Books { get; set; }
 }

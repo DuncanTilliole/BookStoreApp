@@ -29,10 +29,8 @@ namespace BookStoreApp.API.Controllers
         public async Task<IActionResult> Index()
         {
             var bookStoreDbContext =await _context.Books
-                .Include(q => q.Author)
-                .ProjectTo<BookReadOnlyDTO>(_mapper.ConfigurationProvider)
                 .ToListAsync();
-            // var booksDTO = _mapper.Map<IEnumerable<BookReadOnlyDTO>>(bookStoreDbContext); // The projectTo function makes this line
+
             return Ok(bookStoreDbContext);
         }
 
@@ -46,8 +44,6 @@ namespace BookStoreApp.API.Controllers
             }
 
             var book = await _context.Books
-                .Include(b => b.Author)
-                .ProjectTo<BookReadOnlyDTO>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (book == null)
             {

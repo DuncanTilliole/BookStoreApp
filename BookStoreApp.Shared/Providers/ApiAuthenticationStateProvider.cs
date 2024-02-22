@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
-using BookStoreApp.Shared.Static;
 using BookStoreApp.Shared.DTO.Auth;
 using System.IdentityModel.Tokens.Jwt;
 using Blazored.LocalStorage;
@@ -23,7 +22,7 @@ namespace BookStoreApp.Shared.Providers
             try
             {
                 var savedToken = await _localStorage.GetItemAsync<string>("accessToken");
-                if (string.IsNullOrEmpty(savedToken)) return notLoggedIn;
+                if (string.IsNullOrEmpty(savedToken) || IsTokenExpired(savedToken)) return notLoggedIn;
 
                 var getUserClaims = DecryptToken(savedToken);
 
@@ -57,12 +56,20 @@ namespace BookStoreApp.Shared.Providers
         public static ClaimsPrincipal SetClaimPrincipal(CustomUserClaims customUserClaims)
         {
             if (customUserClaims.Email is null) return new ClaimsPrincipal();
-            return new ClaimsPrincipal(new ClaimsIdentity(
-                new List<Claim>
-                {
-                    new(ClaimTypes.Name, customUserClaims.Name),
-                    new(ClaimTypes.Email, customUserClaims.Email)
-                }, "JwtAuth"));
+
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.Name, customUserClaims.Name),
+                new(ClaimTypes.Email, customUserClaims.Email)
+            };
+
+            // Add role claim if available
+            if (!string.IsNullOrEmpty(customUserClaims.Role))
+            {
+                claims.Add(new(ClaimTypes.Role, customUserClaims.Role));
+            }
+
+            return new ClaimsPrincipal(new ClaimsIdentity(claims, "JwtAuth"));
         }
 
         public static CustomUserClaims DecryptToken(string jwtToken)
@@ -74,7 +81,24 @@ namespace BookStoreApp.Shared.Providers
 
             var name = token.Claims.FirstOrDefault(_ => _.Type == ClaimTypes.Name);
             var email = token.Claims.FirstOrDefault(_ => _.Type == ClaimTypes.Email);
-            return new CustomUserClaims(name!.Value, email!.Value);
+            var role = token.Claims.FirstOrDefault(_ => _.Type == ClaimTypes.Role);
+            return new CustomUserClaims(name!.Value, email!.Value, role!.Value);
         }
+
+        public static bool IsTokenExpired(string jwtToken)
+        {
+            if (string.IsNullOrEmpty(jwtToken)) return true;
+
+            var handler = new JwtSecurityTokenHandler();
+            var token = handler.ReadJwtToken(jwtToken);
+
+            // Compare la date d'expiration du token avec la date actuelle
+            var expirationTime = token.ValidTo;
+            var currentTime = DateTimeOffset.UtcNow;
+
+            bool response = expirationTime < currentTime;
+            return response;
+        }
+
     }
 }

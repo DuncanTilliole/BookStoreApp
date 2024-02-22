@@ -1,18 +1,27 @@
 ﻿@page "/authors"
 @inject IAuthorsService AuthorsService
+@inject IJSRuntime js
 @rendermode InteractiveServer
 
-<h3>Index</h3>
+<h3>All our authors</h3>
 
-@if(authors == null)
+@if (!response.Success)
+{
+    <div class="alert alert-danger">
+        <h4>Error : @response.Message</h4>
+    </div>
+}
+@if(authors == null && response.Success)
 {
     <div class="alert alert-info">
         <h4>Loading datas...</h4>
     </div>
 }
-else
+else if (authors != null)
 {
-    <a href="/authors/create">Create</a>
+    <AuthorizeView Roles="@Roles.Admin">
+        <a class="btn btn-primary" href="/authors/create"><span class="oi oi-plus" aria-hidden="true"></span>Create a new author</a>
+    </AuthorizeView>
     <br/>
     <table class="table table-responsive">
         <thead>
@@ -26,9 +35,15 @@ else
             @foreach(var author in authors)
             {
                 <tr>
-                    <th>@author.FirstName</th>
-                    <th>@author.LastName</th>
-                    <th>@author.Bio</th>
+                    <td>@author.FirstName</td>
+                    <td>@author.LastName</td>
+                    <td>
+                        <a class="btn btn-primary" href="/authors/details/@author.Id"><span class="oi oi-book" aria-hidden="true"></span>Details</a>
+                        <AuthorizeView Roles="@Roles.Admin">
+                            <a class="btn btn-warning" href="/authors/update/@author.Id"><span class="oi oi-pencil" aria-hidden="true"></span>Edit</a>
+                            <a class="btn btn-danger" @onclick=@(() => HandleDeleteAuthor(@author.Id))><span class="oi oi-delete" aria-hidden="true"></span>Delete</a>
+                        </AuthorizeView>
+                    </td>
                 </tr>
             }
         </tbody>
@@ -36,10 +51,26 @@ else
 }
 
 @code {
-    private List<Author> authors;
+    private List<Author>? authors;
+    private Response<List<Author>> response = new Response<List<Author>> { Success = true };
 
-    protected async override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
-        authors = await AuthorsService.GetAuthors();
+        response = await AuthorsService.GetAuthors();
+
+        if (response.Success)
+            authors = response.Datas;
+
+    }
+
+    private async void HandleDeleteAuthor(int Id)
+    {
+        bool confirm = await js.InvokeAsync<bool>("confirm", "Are you sure to delete this ressource?");
+        if (confirm)
+        {
+            await AuthorsService.DeleteAuthor(Id);
+            await OnInitializedAsync();
+        }
+        
     }
 }

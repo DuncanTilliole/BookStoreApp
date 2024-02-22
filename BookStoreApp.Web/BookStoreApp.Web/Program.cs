@@ -1,4 +1,5 @@
 using Blazored.LocalStorage;
+using BookStoreApp.Web.Configurations;
 using BookStoreApp.Shared.Providers;
 using BookStoreApp.Shared.Services.Authentication;
 using BookStoreApp.Shared.Services.Authors;
@@ -11,6 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
+
+builder.Services.AddAutoMapper(typeof(MapperConfig));
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();

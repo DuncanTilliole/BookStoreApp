@@ -1,0 +1,53 @@
+﻿@page "/authors/update/{id:int}"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = Roles.Admin)]
+
+@using AutoMapper;
+
+@inject IAuthorsService authorsService
+@inject NavigationManager NavigationManager
+@inject IMapper Mapper
+
+<h3>Edit Author</h3>
+
+<EditForm Model="Author" OnValidSubmit="HandleUpdateAuthor">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="form-group">
+        <label for="email">First name</label>
+        <InputText class="form-control" @bind-Value="Author.FirstName" />
+    </div>
+    <div class="form-group">
+        <label for="password">Last name</label>
+        <InputText class="form-control" @bind-Value="Author.LastName" />
+    </div>
+    <div class="form-group">
+        <label for="password">Bio</label>
+        <InputText class="form-control" @bind-Value="Author.Bio" />
+    </div>
+    <br />
+    <button class="btn btn-primary" type="submit">Update author</button>
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    private AuthorUpdateDTO Author = new AuthorUpdateDTO();
+
+    protected async override Task OnInitializedAsync()
+    {
+        var response = await authorsService.GetAuthor(id);
+        if (response.Success) Author = Mapper.Map<AuthorUpdateDTO>(response.Datas);
+
+    }
+
+    private async Task HandleUpdateAuthor()
+    {
+        Response<int> response = await authorsService.UpdateAuthor(id, Author);
+
+        if (response.Success)
+            NavigationManager.NavigateTo("/authors");
+    }
+}

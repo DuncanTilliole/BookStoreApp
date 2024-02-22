@@ -58,16 +58,12 @@
         RegistrationModel.UserName = RegistrationModel.Email;
         RegistrationModel.Role = "User";
 
-        ResponseAPI response = await AuthService.RegisterAsync(RegistrationModel);
+        Response<string> response = await AuthService.RegisterAsync(RegistrationModel);
 
-        if (response.IsValidate)
-        {
+        if (response.Success)
             NavigationManager.NavigateTo("/login");
-        }
         else
-        {
-            registrationError = response.ResponseBody;
-        }
+            registrationError = response.Message;
     }
 
 }

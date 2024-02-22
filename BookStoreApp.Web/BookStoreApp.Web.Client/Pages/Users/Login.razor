@@ -43,17 +43,12 @@
 
     private async Task HandleLogin()
     {
-        ResponseAPI response = await AuthService.AuthenticateAsync(LoginModel);
+        Response<string> response = await AuthService.AuthenticateAsync(LoginModel);
 
-        if (response.IsValidate)
-        {
+        if (response.Success)
             NavigationManager.NavigateTo("");
-        }
         else
-        {
-            // Display the error message
-            RegistrationError = response.ResponseBody;
-        }
+            RegistrationError = response.Message;
     }
 
 }

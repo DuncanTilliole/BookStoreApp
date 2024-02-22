@@ -4,6 +4,8 @@
     (
         string Name = null!,
 
-        string Email = null!
+        string Email = null!,
+
+        string Role = null!
     );
 }

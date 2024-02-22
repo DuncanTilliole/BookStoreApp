@@ -4,6 +4,7 @@ using Blazored.LocalStorage;
 using BookStoreApp.Shared.DTO.Response;
 using Microsoft.AspNetCore.Components.Authorization;
 using BookStoreApp.Shared.Providers;
+using BookStoreApp.Shared.Bases;
 
 namespace BookStoreApp.Shared.Services.Authentication
 {
@@ -18,7 +19,7 @@ namespace BookStoreApp.Shared.Services.Authentication
             _localStorageService = localStorage;
             _stateProvider = authenticationStateProvider;
         }
-        public async Task<ResponseAPI> AuthenticateAsync(UserToLoginDTO loginModel)
+        public async Task<Response<string>> AuthenticateAsync(UserToLoginDTO loginModel)
         {
            try
            {
@@ -38,42 +39,42 @@ namespace BookStoreApp.Shared.Services.Authentication
 
                     var res = ((ApiAuthenticationStateProvider)_stateProvider).GetAuthenticationStateAsync();
 
-                    return new ResponseAPI { ResponseBody = responseBody, IsValidate = true };
+                    return new Response<string> { Datas = responseBody, Success = true };
                 }
                 else
                 {
-                    return new ResponseAPI { ResponseBody = responseBody, IsValidate = false };
+                    return new Response<string> { Success = false };
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"ERROR WRITING : {ex}");
-                return new ResponseAPI { ResponseBody = "Error Server, try again later.", IsValidate = false };
+                return new Response<string> { Success = false };
             }
         }
 
-        public async Task<ResponseAPI> RegisterAsync(UserToRegisterDTO registerModel)
+        public async Task<Response<string>> RegisterAsync(UserToRegisterDTO registerModel)
         {
             try
             {
                 var json = JsonSerializer.Serialize(registerModel);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.PostAsync("https://localhost:7003/Auth/Register", content);
+                var response = await _httpClient.PutAsync("https://localhost:7003/Auth/Register", content);
                 string responseBody = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
-                    return new ResponseAPI { ResponseBody = responseBody, IsValidate = true };
+                    return new Response<string> { Datas = responseBody, Success = true };
                 }
                 else
                 {
-                    return new ResponseAPI { ResponseBody = responseBody, IsValidate = false };
+                    return new Response<string> { Success = false };
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                return new ResponseAPI { ResponseBody = "Error Server, try again later.", IsValidate = false };
+                return new Response<string> { Message = "Error Server, try again later.", Success = false };
             }
         }
 

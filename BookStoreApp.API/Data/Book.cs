@@ -1,12 +1,10 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
 namespace BookStoreApp.API.Data;
 
-public partial class Book
+public class Book
 {
     [JsonProperty("id")]
     public int Id { get; set; }
@@ -33,7 +31,5 @@ public partial class Book
     [Column(TypeName = "decimal(18, 2)")]
     public decimal? Price { get; set; }
 
-    public int? AuthorId { get; set; }
-
-    public virtual Author? Author { get; set; }
+    public int AuthorId { get; set; }
 }
