@@ -6,12 +6,12 @@ namespace BookStoreApp.Shared.Services.Authors
     {
         Task<Response<List<Author>>> GetAuthors();
 
-        Task<Response<Author>> GetAuthor(int Id);
+        Task<Response<Author>> GetAuthor(int id);
 
         Task<Response<int>> CreateAuthor(AuthorCreateDTO author);
 
-        Task<Response<int>> UpdateAuthor(int Id, AuthorUpdateDTO author);
+        Task<Response<int>> UpdateAuthor(int id, AuthorUpdateDTO author);
 
-        Task<Response<int>> DeleteAuthor(int Id);
+        Task<Response<int>> DeleteAuthor(int id);
     }
 }

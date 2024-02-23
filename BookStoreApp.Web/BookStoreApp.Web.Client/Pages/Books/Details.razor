@@ -1,0 +1,68 @@
+﻿@page "/books/details/{id:int}"
+@rendermode InteractiveAuto
+@inject IBooksService booksService
+@inject NavigationManager navigationManager
+
+<h3>Details Book</h3>
+
+<EditForm Model="book">
+    <fieldset disabled="true">
+        <div class="form-group">
+            <label for="firstname">Title</label>
+            <InputText class="form-control" @bind-Value="book.Title" />
+        </div>
+        <br />
+        <div class="form-group">
+            <label for="lastname">ISBN</label>
+            <InputText class="form-control" @bind-Value="book.Isbn" />
+        </div>
+        <br />
+        <div class="form-group">
+            <label for="lastname">Summary</label>
+            <InputText class="form-control" @bind-Value="book.Summary" />
+        </div>
+        <br />
+        <div class="form-group">
+            <label for="lastname">Year</label>
+            <InputNumber class="form-control" @bind-Value="book.Year" />
+        </div>
+        <br />
+        <div class="form-group">
+            <label for="lastname">Price</label>
+            <InputNumber class="form-control" @bind-Value="book.Price" />
+        </div>
+        <br />
+        <div class="form-group">
+            <label for="bio">Author</label>
+            <InputText class="form-control" @bind-Value="book.AuthorName" />
+        </div>
+        <br />
+         <div class="form-group">
+            <label for="bio">Image</label>
+            <img src="@book.Image" width="50" height="50" class="img-thumbnail">
+        </div>
+        <br />
+    </fieldset>
+    <br />
+    <button class="btn btn-primary" @onclick="HandleNavigateToEdit">Go to Edit</button>
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    private BookReadOnlyDTO book = new BookReadOnlyDTO();
+
+    protected async override Task OnInitializedAsync()
+    {
+        var response = await booksService.Get(id);
+        if (response.Success) book = response.Datas!;
+
+    }
+
+    private void HandleNavigateToEdit()
+    {
+        navigationManager.NavigateTo($"/authors/update/{id}");
+    }
+}

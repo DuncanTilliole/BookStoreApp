@@ -44,7 +44,10 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+});
 
 builder.Services.AddCors(options =>
 {
@@ -111,7 +114,7 @@ app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
             Path.Combine(app.Environment.ContentRootPath, "Publics", "Images")),
-    RequestPath = "/Publics"
+    RequestPath = "/Publics/Images"
 });
 
 app.UseCors("AllowSpecificOrigin");

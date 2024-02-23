@@ -6,6 +6,7 @@ using BookStoreApp.API.DTO.Book;
 using AutoMapper.QueryableExtensions;
 using BookStoreApp.API.Statics;
 using Microsoft.AspNetCore.Authorization;
+using System.Collections.Generic;
 
 namespace BookStoreApp.API.Controllers
 {
@@ -16,12 +17,14 @@ namespace BookStoreApp.API.Controllers
         private readonly BookStoreDbContext _context;
         private readonly ILogger _logger;
         private readonly IMapper _mapper;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public BooksController(BookStoreDbContext context, ILogger<AuthorsController> logger, IMapper mapper)
+        public BooksController(BookStoreDbContext context, ILogger<AuthorsController> logger, IMapper mapper, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
             _logger = logger;
             _mapper = mapper;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // GET: Books
@@ -29,6 +32,8 @@ namespace BookStoreApp.API.Controllers
         public async Task<IActionResult> Index()
         {
             var bookStoreDbContext =await _context.Books
+                .Include(q => q.Author)
+                .ProjectTo<BookReadOnlyDTO>(_mapper.ConfigurationProvider)
                 .ToListAsync();
 
             return Ok(bookStoreDbContext);
@@ -63,6 +68,11 @@ namespace BookStoreApp.API.Controllers
             try
             {
                 var book = _mapper.Map<Book>(bookDTO);
+
+                // Insert the image in the project
+                if (bookDTO.ImageData != null && bookDTO.OriginalImageName != null)
+                    book.Image = CreateFile(bookDTO.ImageData, bookDTO.OriginalImageName);
+
                 _context.Books.Add(book);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -96,7 +106,20 @@ namespace BookStoreApp.API.Controllers
                 return NotFound();
             }
 
+            if (string.IsNullOrEmpty(bookDTO.ImageData) == false)
+            {
+                bookDTO.Image = CreateFile(bookDTO.ImageData, bookDTO.OriginalImageName);
+
+                var picName = Path.GetFileName(existingBook.Image);
+                var path = $"{_webHostEnvironment.ContentRootPath}\\Publics\\Images\\{picName}";
+                if (System.IO.File.Exists(path))
+                {
+                    System.IO.File.Delete(path);
+                }
+            }
+
             _mapper.Map(bookDTO, existingBook);
+
             _context.Entry(existingBook).State = EntityState.Modified;
 
             try
@@ -129,6 +152,28 @@ namespace BookStoreApp.API.Controllers
         private bool BookExists(int id)
         {
             return _context.Books.Any(e => e.Id == id);
+        }
+
+        private string CreateFile(string imageBase64, string imageName)
+        {
+            var url = HttpContext.Request.Host.Value;
+            var ext = Path.GetExtension(imageName);
+            var fileName = $"{Guid.NewGuid()}{ext}";
+
+            // Specify the directory where images are stored
+            var directory = Path.Combine(_webHostEnvironment.ContentRootPath, "Publics", "Images");
+            Directory.CreateDirectory(directory); // Ensure the directory exists
+
+            var path = Path.Combine(directory, fileName);
+
+            byte[] image = Convert.FromBase64String(imageBase64);
+
+            using (var fileStream = System.IO.File.Create(path))
+            {
+                fileStream.Write(image, 0, image.Length);
+            }
+
+            return $"https://{url}/Publics/Images/{fileName}";
         }
     }
 }

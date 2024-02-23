@@ -21,6 +21,10 @@ namespace BookStoreApp.API.DTO.Book
 
         public string? Image { get; set; }
 
+        public string? ImageData { get; set; }
+
+        public string? OriginalImageName { get; set; }
+
         [Required]
         [Range(0, int.MaxValue)]
         public decimal? Price { get; set; }

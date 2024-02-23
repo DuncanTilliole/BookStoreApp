@@ -5,6 +5,8 @@ using BookStoreApp.API.DTO.Author;
 using AutoMapper;
 using BookStoreApp.API.Statics;
 using Microsoft.AspNetCore.Authorization;
+using BookStoreApp.API.DTO.Book;
+using AutoMapper.QueryableExtensions;
 
 namespace BookStoreApp.API.Controllers
 {
@@ -29,7 +31,9 @@ namespace BookStoreApp.API.Controllers
         {
             try
             {
-                return Ok(await _context.Authors.ToListAsync());
+                var authors = await _context.Authors.ToListAsync();
+                IEnumerable<AuthorReadOnlyDTO> authorDTO = _mapper.Map<IEnumerable<AuthorReadOnlyDTO>>(authors);
+                return Ok(authorDTO);
             }
             catch (Exception ex)
             {
@@ -40,7 +44,7 @@ namespace BookStoreApp.API.Controllers
 
         // GET: Authors/Details/5
         [HttpGet("Details/{id:int}")]
-        public async Task<IActionResult> Details(int? id)
+        public async Task<ActionResult<AuthorDetailsDTO>> Details(int? id)
         {
             if (id == null) return NotFound();
 
@@ -48,10 +52,11 @@ namespace BookStoreApp.API.Controllers
             {
                 var author = await _context.Authors
                     .Include(author => author.Books)
+                    .ProjectTo<AuthorDetailsDTO>(_mapper.ConfigurationProvider)
                     .FirstOrDefaultAsync(m => m.Id == id);
 
                 if (author == null) return NotFound();
-                
+
                 return Ok(author);
             }
             catch (Exception ex)

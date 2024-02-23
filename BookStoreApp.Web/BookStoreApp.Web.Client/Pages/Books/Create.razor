@@ -1,0 +1,98 @@
+﻿@page "/books/create"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = Roles.Admin)]
+
+@using AutoMapper;
+
+@inject IBooksService booksService
+@inject IAuthorsService authorsService
+@inject IMapper mapper
+@inject NavigationManager navigationManager
+
+<h3>Create a new book</h3>
+<EditForm Model="book" OnValidSubmit="HandleCreate">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="form-group">
+        <label for="title">Title *</label>
+        <InputText class="form-control" @bind-Value="book.Title" />
+    </div>
+    <div class="form-group">
+        <label for="price">Isbn *</label>
+        <InputText class="form-control" @bind-Value="book.Isbn" />
+    </div>
+    <div class="form-group">
+        <label for="summary">Summary *</label>
+        <InputText class="form-control" @bind-Value="book.Summary" />
+    </div>
+    <div class="form-group">
+        <label for="summary">Year *</label>
+        <InputNumber class="form-control" @bind-Value="book.Year" />
+    </div>
+    <div class="form-group">
+        <label for="summary">Price *</label>
+        <InputNumber class="form-control" @bind-Value="book.Price" />
+    </div>
+    <div class="form-group">
+        <label for="summary">Author *</label>
+        <InputSelect class="form-select" @bind-Value="book.AuthorId">
+            <option value="">-- Select Author --</option>
+            @if(authors != null)
+                @foreach (var author in authors)
+                {
+                    <option value="@author.Id">@author.FirstName - @author.LastName</option>
+                }
+        </InputSelect>
+    </div>
+    <br />
+    <div class="form-group">
+        <label for="summary">Book cover photo</label>
+        <InputFile OnChange="HandleFileSelection" />
+        <img src="@img" width="100" height="100" class="img-thumbnail">
+        <p class="text-danger">@UploadFileWarning</p>
+    </div>
+    <button class="btn btn-primary" type="submit">Create book</button>
+</EditForm>
+
+@code {
+    private BookCreateDTO book = new BookCreateDTO();
+    private List<AuthorReadOnlyDTO> authors;
+    private string UploadFileWarning = string.Empty;
+    private string img = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var response = await authorsService.GetAuthors();
+        if (response.Success) authors = mapper.Map<List<AuthorReadOnlyDTO>>(response.Datas);
+    }
+
+    private async Task HandleCreate()
+    {
+        Response<int> response = await booksService.Create(book);
+
+        if (response.Success)
+            navigationManager.NavigateTo("/books");
+    }
+
+    private async Task HandleFileSelection(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if(file != null)
+        {
+            var ext = System.IO.Path.GetExtension(file.Name);
+            if (ext.ToLower().Contains("jpg") || ext.ToLower().Contains("png") || ext.ToLower().Contains("jpeg"))
+            {
+                var byteArray = new byte[file.Size];
+                await file.OpenReadStream().ReadAsync(byteArray);
+                string imageType = file.ContentType;
+                string base64string = Convert.ToBase64String(byteArray);
+
+                book.ImageData = base64string;
+                book.OriginalImageName = file.Name;
+                img = $"data:{imageType}; base64, {base64string}";
+            }
+            else UploadFileWarning = "Please select a valid image file (*.jpeg | *.jpg | *.png)";
+        }
+
+    }
+}

@@ -5,6 +5,7 @@ using BookStoreApp.Shared.Services.Authentication;
 using BookStoreApp.Shared.Services.Authors;
 using BookStoreApp.Web.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using BookStoreApp.Shared.Services.Books;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,7 @@ builder.Services.AddAutoMapper(typeof(MapperConfig));
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IAuthorsService, AuthorsService>();
+builder.Services.AddScoped<IBooksService, BooksService>();
 builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
 builder.Services.AddScoped<CookiesEvents>();
 

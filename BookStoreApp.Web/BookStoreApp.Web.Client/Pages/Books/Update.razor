@@ -1,0 +1,97 @@
+﻿@page "/books/update/{id:int}"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = Roles.Admin)]
+
+@using AutoMapper;
+
+@inject IBooksService booksService
+@inject NavigationManager navigationManager
+@inject IMapper mapper
+
+<h3>Edit Book</h3>
+
+<EditForm Model="book" OnValidSubmit="HandleUpdate">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="form-group">
+        <label for="title">Title</label>
+        <InputText class="form-control" @bind-Value="book.Title" />
+    </div>
+    <div class="form-group">
+        <label for="isbn">ISBN</label>
+        <InputText class="form-control" @bind-Value="book.Isbn" />
+    </div>
+    <br />
+    <div class="form-group">
+        <label for="price">Price</label>
+        <InputNumber class="form-control" @bind-Value="book.Price" />
+    </div>
+    <br />
+    <div class="form-group">
+        <label for="summary">Summary</label>
+        <InputText class="form-control" @bind-Value="book.Summary" />
+    </div>
+    <br />
+    <div class="form-group">
+        <label for="summary">Book cover photo</label>
+        <InputFile OnChange="HandleFileSelection" />
+        <img src="@img" width="100" height="100" class="img-thumbnail">
+        <p class="text-danger">@uploadFileWarning</p>
+    </div>
+    <br />
+    <button class="btn btn-primary" type="submit">Update book</button>
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+    private BookUpdateDTO book = new BookUpdateDTO();
+    private string uploadFileWarning = string.Empty;
+    private string img = string.Empty;
+    private long maxFileSize = 1024 * 1024 * 5;
+
+    protected async override Task OnInitializedAsync()
+    {
+        var response = await booksService.Get(id);
+        if (response.Success)
+        {
+            book = mapper.Map<BookUpdateDTO>(response.Datas);
+            img = book.Image;
+        }
+
+    }
+
+    private async Task HandleUpdate()
+    {
+        Response<int> response = await booksService.Update(id, book);
+
+        if (response.Success)
+            navigationManager.NavigateTo("/books");
+    }
+
+    private async Task HandleFileSelection(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            var ext = System.IO.Path.GetExtension(file.Name);
+
+            if (file.Size > maxFileSize) uploadFileWarning = "File too big";
+
+            if (ext.ToLower().Contains("jpg") || ext.ToLower().Contains("png") || ext.ToLower().Contains("jpeg"))
+            {
+                var byteArray = new byte[file.Size];
+                await file.OpenReadStream().ReadAsync(byteArray);
+                string imageType = file.ContentType;
+                string base64string = Convert.ToBase64String(byteArray);
+
+                book.ImageData = base64string;
+                book.OriginalImageName = file.Name;
+                img = $"data:{imageType}; base64, {base64string}";
+            }
+            else uploadFileWarning = "Please select a valid image file (*.jpeg | *.jpg | *.png)";
+        }
+
+    }
+}

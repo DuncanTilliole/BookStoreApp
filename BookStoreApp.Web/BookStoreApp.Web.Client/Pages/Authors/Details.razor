@@ -1,9 +1,7 @@
 ﻿@page "/authors/details/{id:int}"
 @rendermode InteractiveAuto
-@using AutoMapper;
 @inject IAuthorsService authorsService
 @inject NavigationManager NavigationManager
-@inject IMapper Mapper
 
 <h3>Details Author</h3>
 
@@ -40,7 +38,7 @@
             @foreach(var book in Author.Books)
             {
                 <div class="card" style="width: 18rem; margin-right: 10px;">
-                <img src="@($"https://localhost:7003{book.Image}")" class="card-img-top" alt="@book.Title">
+                    <img src="@book.Image" class="card-img-top" alt="@book.Title">
                 <div class="card-body">
                     <h5 class="card-title">@book.Title</h5>
                     <p class="card-text">@book.Summary</p>
@@ -64,7 +62,7 @@
     protected async override Task OnInitializedAsync()
     {
         var response = await authorsService.GetAuthor(id);
-        if (response.Success) Author = response.Datas;
+        if (response.Success) Author = response.Datas!;
 
     }
 

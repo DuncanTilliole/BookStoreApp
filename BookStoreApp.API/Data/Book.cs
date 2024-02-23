@@ -24,7 +24,7 @@ public class Book
     [JsonProperty("summary")]
     public string? Summary { get; set; }
 
-    [MaxLength(50)]
+    [MaxLength(250)]
     [JsonProperty("image")]
     public string? Image { get; set; }
 
@@ -32,4 +32,6 @@ public class Book
     public decimal? Price { get; set; }
 
     public int AuthorId { get; set; }
+
+    public virtual Author Author { get; set; }
 }

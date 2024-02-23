@@ -7,7 +7,10 @@ namespace BookStoreApp.Web.Configurations
         public MapperConfig()
         {
             CreateMap<AuthorUpdateDTO, Author>().ReverseMap();
-            CreateMap<Author, AuthorUpdateDTO>().ReverseMap();
+            CreateMap<AuthorReadOnlyDTO, Author>().ReverseMap();
+            CreateMap<BookUpdateDTO, BookReadOnlyDTO>()
+                .ReverseMap()
+                .ForMember(dest => dest.ImageData, opt => opt.MapFrom(src => src.Image));
         }
     }
 }

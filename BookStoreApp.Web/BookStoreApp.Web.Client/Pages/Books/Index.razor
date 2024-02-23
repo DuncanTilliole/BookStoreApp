@@ -1,0 +1,81 @@
+﻿@page "/books"
+@inject IBooksService BooksService
+@inject IJSRuntime js
+@rendermode InteractiveServer
+
+<h3>All our books</h3>
+
+@if (!response.Success)
+{
+    <div class="alert alert-danger">
+        <h4>Error : @response.Message</h4>
+    </div>
+}
+@if (books == null && response.Success)
+{
+    <div class="alert alert-info">
+        <h4>Loading datas...</h4>
+    </div>
+}
+else if (books != null)
+{
+    <AuthorizeView Roles="@Roles.Admin">
+        <a class="btn btn-primary" href="/books/create"><span class="oi oi-plus" aria-hidden="true"></span>Create a new book</a>
+    </AuthorizeView>
+    <br />
+    <table class="table table-responsive">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Price</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var book in books)
+            {
+                <tr>
+                    <td>
+                        <img src="@book.Image" width="50" height="50" class="img-thumbnail" alt="@book.Title">
+                    </td>
+                    <td>@book.Title</td>
+                    <td>@book.AuthorName</td>
+                    <td>@book.Price</td>
+                    <td>
+                        <a class="btn btn-primary" href="/books/details/@book.Id"><span class="oi oi-book" aria-hidden="true"></span>Details</a>
+                        <AuthorizeView Roles="@Roles.Admin">
+                            <a class="btn btn-warning" href="/books/update/@book.Id"><span class="oi oi-pencil" aria-hidden="true"></span>Edit</a>
+                            <a class="btn btn-danger" @onclick=@(() => HandleDelete(@book.Id))><span class="oi oi-delete" aria-hidden="true"></span>Delete</a>
+                        </AuthorizeView>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<BookReadOnlyDTO>? books;
+    private Response<List<BookReadOnlyDTO>> response = new Response<List<BookReadOnlyDTO>> { Success = true };
+
+    protected override async Task OnInitializedAsync()
+    {
+        response = await BooksService.Get();
+
+        if (response.Success)
+            books = response.Datas;
+
+    }
+
+    private async void HandleDelete(int id)
+    {
+        bool confirm = await js.InvokeAsync<bool>("confirm", "Are you sure to delete this ressource?");
+        if (confirm)
+        {
+            await BooksService.Delete(id);
+            await OnInitializedAsync();
+        }
+    }
+}
