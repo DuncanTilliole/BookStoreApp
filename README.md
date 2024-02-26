@@ -56,7 +56,7 @@ This project is a web application developed with Blazor, utilizing ASP.NET MVC, 
 
 5. Open a terminal window in the root directory of the application and run the following command to create the database:
 
-´dotnet ef database update´
+`dotnet ef database update`
 
 6. Then, run the application using the following command:
 
