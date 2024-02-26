@@ -3,10 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using BookStoreApp.API.Data;
 using AutoMapper;
 using BookStoreApp.API.DTO.Book;
-using AutoMapper.QueryableExtensions;
 using BookStoreApp.API.Statics;
 using Microsoft.AspNetCore.Authorization;
-using System.Collections.Generic;
+using BookStoreApp.API.Repositories.Interfaces;
+using BookStoreApp.API.DTO.Author;
+using BookStoreApp.API.DTO;
 
 namespace BookStoreApp.API.Controllers
 {
@@ -14,48 +15,61 @@ namespace BookStoreApp.API.Controllers
     [Route("[controller]")]
     public class BooksController : Controller
     {
-        private readonly BookStoreDbContext _context;
         private readonly ILogger _logger;
         private readonly IMapper _mapper;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IBooksRepository _booksRepository;
 
-        public BooksController(BookStoreDbContext context, ILogger<AuthorsController> logger, IMapper mapper, IWebHostEnvironment webHostEnvironment)
+        public BooksController(ILogger<AuthorsController> logger, IMapper mapper, IWebHostEnvironment webHostEnvironment, IBooksRepository booksRepository)
         {
-            _context = context;
             _logger = logger;
             _mapper = mapper;
             _webHostEnvironment = webHostEnvironment;
+            _booksRepository = booksRepository;
         }
 
         // GET: Books
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<ActionResult<VirtualizeResponse<BookReadOnlyDTO>>> Index([FromQuery] QueryParameters queryParameters)
         {
-            var bookStoreDbContext =await _context.Books
-                .Include(q => q.Author)
-                .ProjectTo<BookReadOnlyDTO>(_mapper.ConfigurationProvider)
-                .ToListAsync();
+            try
+            {
+                var books = await _booksRepository.GetAllAsync<BookReadOnlyDTO>(queryParameters);
 
-            return Ok(bookStoreDbContext);
+                return Ok(books);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error performing in {nameof(Index)}");
+                return StatusCode(500, Messages.Error500Message);
+            }
         }
 
         // GET: Books/Details/5
         [HttpGet("Details/{id:int}")]
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
+            try
             {
-                return NotFound();
-            }
+                if (id == null)
+                {
+                    return NotFound();
+                }
 
-            var book = await _context.Books
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (book == null)
+                var book = await _booksRepository.GetAsync(id);
+
+                if (book == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(book);
+            }
+            catch (Exception ex)
             {
-                return NotFound();
+                _logger.LogError(ex, $"Error performing in {nameof(Details)}");
+                return StatusCode(500, Messages.Error500Message);
             }
-
-            return Ok(book);
         }
 
         // POST: Books/Create
@@ -73,8 +87,8 @@ namespace BookStoreApp.API.Controllers
                 if (bookDTO.ImageData != null && bookDTO.OriginalImageName != null)
                     book.Image = CreateFile(bookDTO.ImageData, bookDTO.OriginalImageName);
 
-                _context.Books.Add(book);
-                await _context.SaveChangesAsync();
+                await _booksRepository.AddAsync(book);
+
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -97,7 +111,7 @@ namespace BookStoreApp.API.Controllers
             }
 
             // Retrieve the existing book from the database using FindAsync
-            var existingBook = await _context.Books.FindAsync(id);   
+            var existingBook = await _booksRepository.GetAsync(id);   
 
             // Check if the author exists
             if (existingBook == null)
@@ -106,7 +120,7 @@ namespace BookStoreApp.API.Controllers
                 return NotFound();
             }
 
-            if (string.IsNullOrEmpty(bookDTO.ImageData) == false)
+            if (string.IsNullOrEmpty(bookDTO.ImageData) == false && string.IsNullOrEmpty(bookDTO.OriginalImageName) == false)
             {
                 bookDTO.Image = CreateFile(bookDTO.ImageData, bookDTO.OriginalImageName);
 
@@ -120,11 +134,9 @@ namespace BookStoreApp.API.Controllers
 
             _mapper.Map(bookDTO, existingBook);
 
-            _context.Entry(existingBook).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                await _booksRepository.UpdateAsync(existingBook);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -139,19 +151,14 @@ namespace BookStoreApp.API.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var book = await _context.Books.FindAsync(id);
+            var book = await _booksRepository.GetAsync(id);
             if (book != null)
             {
-                _context.Books.Remove(book);
-                await _context.SaveChangesAsync();
+                await _booksRepository.DeleteAsync(id);
+
                 return Ok(Messages.Delete200Message);
             }
             return NotFound();
-        }
-
-        private bool BookExists(int id)
-        {
-            return _context.Books.Any(e => e.Id == id);
         }
 
         private string CreateFile(string imageBase64, string imageName)

@@ -1,15 +1,24 @@
-﻿namespace BookStoreApp.API.DTO.Book
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace BookStoreApp.API.DTO.Book
 {
     public class BookReadOnlyDTO : BaseDTO
     {
-        public string Title { get; set; }
+        [Required]
+        [StringLength(50)]
+        public required string Title { get; set; }
 
-        public string Image { get; set; }
+        [Required]
+        [Range(0, int.MaxValue)]
+        public required decimal Price { get; set; }
 
-        public decimal Price { get; set; }
+        [Required]
+        public required int AuthorId { get; set; }
 
-        public int AuthorId { get; set; }
+        [Required]
+        [StringLength(50)]
+        public required string AuthorName { get; set; }
 
-        public string AuthorName { get; set; }
+        public string? Image { get; set; }
     }
 }

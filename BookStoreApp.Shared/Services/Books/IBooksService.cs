@@ -1,10 +1,10 @@
-﻿using BookStoreApp.Shared.Bases;
+﻿using BookStoreApp.Shared.DTO.Response;
 
 namespace BookStoreApp.Shared.Services.Books
 {
     public interface IBooksService
     {
-        Task<Response<List<BookReadOnlyDTO>>> Get();
+        Task<Response<VirtualizedResponse<BookReadOnlyDTO>>> Get(QueryParameters queryParameters);
 
         Task<Response<BookReadOnlyDTO>> Get(int id);
 

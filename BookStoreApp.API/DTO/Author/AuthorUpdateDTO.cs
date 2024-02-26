@@ -6,13 +6,14 @@ namespace BookStoreApp.API.DTO.Author
     {
         [Required]
         [StringLength(50)]
-        public string FirstName { get; set; }
+        public required string FirstName { get; set; }
 
         [Required]
         [StringLength(50)]
-        public string LastName { get; set; }
+        public required string LastName { get; set; }
 
+        [Required]
         [StringLength(250)]
-        public string Bio { get; set; }
+        public required string Bio { get; set; }
     }
 }

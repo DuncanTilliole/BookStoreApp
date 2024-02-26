@@ -7,6 +7,8 @@ using BookStoreApp.API.Statics;
 using Microsoft.AspNetCore.Authorization;
 using BookStoreApp.API.DTO.Book;
 using AutoMapper.QueryableExtensions;
+using BookStoreApp.API.Repositories.Interfaces;
+using BookStoreApp.API.DTO;
 
 namespace BookStoreApp.API.Controllers
 {
@@ -14,26 +16,25 @@ namespace BookStoreApp.API.Controllers
     [Route("[controller]")]
     public class AuthorsController : Controller
     {
-        private readonly BookStoreDbContext _context;
         private readonly ILogger _logger;
         private readonly IMapper _mapper;
+        private readonly IAuthorsRepository _authorsRepository;
 
-        public AuthorsController(BookStoreDbContext context, ILogger<AuthorsController> logger, IMapper mapper)
+        public AuthorsController(ILogger<AuthorsController> logger, IMapper mapper, IAuthorsRepository authorsRepository)
         {
-            _context = context;
             _logger = logger;
             _mapper = mapper;
+            _authorsRepository = authorsRepository;
         }
 
         // GET: Authors
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<ActionResult<VirtualizeResponse<AuthorReadOnlyDTO>>> Index([FromQuery]QueryParameters queryParameters)
         {
             try
             {
-                var authors = await _context.Authors.ToListAsync();
-                IEnumerable<AuthorReadOnlyDTO> authorDTO = _mapper.Map<IEnumerable<AuthorReadOnlyDTO>>(authors);
-                return Ok(authorDTO);
+                var authors = await _authorsRepository.GetAllAsync<AuthorReadOnlyDTO>(queryParameters);
+                return Ok(authors);
             }
             catch (Exception ex)
             {
@@ -44,16 +45,11 @@ namespace BookStoreApp.API.Controllers
 
         // GET: Authors/Details/5
         [HttpGet("Details/{id:int}")]
-        public async Task<ActionResult<AuthorDetailsDTO>> Details(int? id)
+        public async Task<ActionResult<AuthorDetailsDTO>> Details(int id)
         {
-            if (id == null) return NotFound();
-
             try
             {
-                var author = await _context.Authors
-                    .Include(author => author.Books)
-                    .ProjectTo<AuthorDetailsDTO>(_mapper.ConfigurationProvider)
-                    .FirstOrDefaultAsync(m => m.Id == id);
+                var author = await _authorsRepository.GetAuthorDetailsAsync(id);
 
                 if (author == null) return NotFound();
 
@@ -78,8 +74,8 @@ namespace BookStoreApp.API.Controllers
                 var author = _mapper.Map<Author>(authorDTO);
                 if (ModelState.IsValid)
                 {
-                    _context.Authors.Add(author);
-                    await _context.SaveChangesAsync();
+                    await _authorsRepository.AddAsync(author);
+
                     return RedirectToAction(nameof(Index));
                 }
                 return StatusCode(500, Messages.Error500Message);
@@ -100,7 +96,7 @@ namespace BookStoreApp.API.Controllers
         {
             var author = _mapper.Map<Author>(authorDTO);
             // Retrieve the existing author from the database using FindAsync
-            var existingAuthor = await _context.Authors.FindAsync(id);
+            var existingAuthor = await _authorsRepository.GetAsync(id);
             // Check if the author exists
             if (existingAuthor == null)
             {
@@ -118,8 +114,8 @@ namespace BookStoreApp.API.Controllers
             {
                 try
                 {
-                    // Save the changes to the database
-                    await _context.SaveChangesAsync();
+                    await _authorsRepository.UpdateAsync(existingAuthor);
+
                     return Ok(existingAuthor);
                 }
                 catch (Exception ex)
@@ -139,20 +135,14 @@ namespace BookStoreApp.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var author = await _context.Authors.FindAsync(id);
+            var author = await _authorsRepository.GetAsync(id);
             if (author != null)
             {
-                _context.Authors.Remove(author);
+                await _authorsRepository.DeleteAsync(id);
 
-                await _context.SaveChangesAsync();
                 return Ok(Messages.Delete200Message);
             }
             return NotFound();
-        }
-
-        private bool AuthorExists(int id)
-        {
-            return _context.Authors.Any(e => e.Id == id);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BookStoreApp.API.Data;
+using BookStoreApp.API.DTO;
 using BookStoreApp.API.DTO.Auth;
 using BookStoreApp.API.DTO.Author;
 using BookStoreApp.API.DTO.Book;

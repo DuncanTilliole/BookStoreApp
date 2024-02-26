@@ -1,6 +1,4 @@
 ﻿@page "/logout"
-@inject IAuthenticationService authService
-@inject NavigationManager navigationManager
 
 @if (RegistrationError != null)
 {
@@ -8,19 +6,5 @@
 }
 
 <h3>Logout</h3>
-
-<button @onclick="LogoutApp">Logout</button>
-
-@code {
-    private string RegistrationError = null!;
-
-    public async void LogoutApp()
-    {
-        bool response = await authService.Logout();
-
-        if (response)
-            navigationManager.NavigateTo("/login");
-        else
-            RegistrationError = "Impossible to logout";
-    }
-}
+<br />
+<button @onclick="LogoutApp" class="btn btn-primary">Click to logout</button>

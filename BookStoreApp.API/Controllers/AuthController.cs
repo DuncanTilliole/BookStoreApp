@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BookStoreApp.API.Data;
 using BookStoreApp.API.DTO.Auth;
+using BookStoreApp.API.Repositories;
 using BookStoreApp.API.Statics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -19,6 +20,7 @@ namespace BookStoreApp.API.Controllers
         private readonly IMapper _mapper;
         private readonly UserManager<ApiUser> _userManager;
         private readonly IConfiguration _configuration;
+
         public AuthController (ILogger<AuthController> logger, IMapper mapper, UserManager<ApiUser> userManager, IConfiguration configuration)
         {
             _logger = logger;

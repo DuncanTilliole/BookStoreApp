@@ -1,7 +1,5 @@
 ﻿@page "/authors/details/{id:int}"
 @rendermode InteractiveAuto
-@inject IAuthorsService authorsService
-@inject NavigationManager NavigationManager
 
 <h3>Details Author</h3>
 
@@ -51,23 +49,3 @@
     <br />
     <button class="btn btn-primary" @onclick="HandleNavigateToEdit">Go to Edit</button>
 </EditForm>
-
-
-@code {
-    [Parameter]
-    public int id { get; set; }
-
-    private Author Author = new Author();
-
-    protected async override Task OnInitializedAsync()
-    {
-        var response = await authorsService.GetAuthor(id);
-        if (response.Success) Author = response.Datas!;
-
-    }
-
-    private void HandleNavigateToEdit()
-    {
-        NavigationManager.NavigateTo($"/authors/update/{id}");
-    }
-}

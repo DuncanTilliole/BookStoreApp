@@ -1,0 +1,32 @@
+﻿@rendermode InteractiveServer
+
+<table class="table table-responsive">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Price</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <Virtualize ItemsProvider="Load" Context="book">
+            <tr>
+                <td>
+                    <img src="@book.Image" width="50" height="50" class="img-thumbnail" alt="@book.Title">
+                </td>
+                <td>@book.Title</td>
+                <td>@book.AuthorName</td>
+                <td>@book.Price</td>
+                <td>
+                    <a class="btn btn-primary" href="/books/details/@book.Id"><span class="oi oi-book" aria-hidden="true"></span>Details</a>
+                    <AuthorizeView Roles="@Roles.Admin">
+                        <a class="btn btn-warning" href="/books/update/@book.Id"><span class="oi oi-pencil" aria-hidden="true"></span>Edit</a>
+                        <a class="btn btn-danger" @onclick=@(() => HandleDelete(@book.Id))><span class="oi oi-delete" aria-hidden="true"></span>Delete</a>
+                    </AuthorizeView>
+                </td>
+            </tr>
+        </Virtualize>
+    </tbody>
+</table>

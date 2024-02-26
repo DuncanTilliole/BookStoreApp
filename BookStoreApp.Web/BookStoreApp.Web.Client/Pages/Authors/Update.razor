@@ -2,12 +2,6 @@
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = Roles.Admin)]
 
-@using AutoMapper;
-
-@inject IAuthorsService authorsService
-@inject NavigationManager NavigationManager
-@inject IMapper Mapper
-
 <h3>Edit Author</h3>
 
 <EditForm Model="Author" OnValidSubmit="HandleUpdateAuthor">
@@ -28,26 +22,3 @@
     <br />
     <button class="btn btn-primary" type="submit">Update author</button>
 </EditForm>
-
-
-@code {
-    [Parameter]
-    public int id { get; set; }
-
-    private AuthorUpdateDTO Author = new AuthorUpdateDTO();
-
-    protected async override Task OnInitializedAsync()
-    {
-        var response = await authorsService.GetAuthor(id);
-        if (response.Success) Author = Mapper.Map<AuthorUpdateDTO>(response.Datas);
-
-    }
-
-    private async Task HandleUpdateAuthor()
-    {
-        Response<int> response = await authorsService.UpdateAuthor(id, Author);
-
-        if (response.Success)
-            NavigationManager.NavigateTo("/authors");
-    }
-}

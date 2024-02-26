@@ -1,7 +1,5 @@
 ﻿@page "/books/details/{id:int}"
 @rendermode InteractiveAuto
-@inject IBooksService booksService
-@inject NavigationManager navigationManager
 
 <h3>Details Book</h3>
 
@@ -46,23 +44,3 @@
     <br />
     <button class="btn btn-primary" @onclick="HandleNavigateToEdit">Go to Edit</button>
 </EditForm>
-
-
-@code {
-    [Parameter]
-    public int id { get; set; }
-
-    private BookReadOnlyDTO book = new BookReadOnlyDTO();
-
-    protected async override Task OnInitializedAsync()
-    {
-        var response = await booksService.Get(id);
-        if (response.Success) book = response.Datas!;
-
-    }
-
-    private void HandleNavigateToEdit()
-    {
-        navigationManager.NavigateTo($"/authors/update/{id}");
-    }
-}

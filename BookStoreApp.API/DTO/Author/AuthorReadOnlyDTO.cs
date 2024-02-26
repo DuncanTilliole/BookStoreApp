@@ -4,10 +4,16 @@ namespace BookStoreApp.API.DTO.Author
 {
     public class AuthorReadOnlyDTO : BaseDTO
     {
-        public string FirstName { get; set; }
+        [Required]
+        [StringLength(50)]
+        public required string FirstName { get; set; }
 
-        public string LastName { get; set; }
+        [Required]
+        [StringLength(50)]
+        public required string LastName { get; set; }
 
-        public string Bio { get; set; }
+        [Required]
+        [StringLength(250)]
+        public required string Bio { get; set; }
     }
 }

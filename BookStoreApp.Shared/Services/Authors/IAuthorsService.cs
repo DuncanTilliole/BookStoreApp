@@ -1,10 +1,10 @@
-﻿using BookStoreApp.Shared.Bases;
+﻿using BookStoreApp.Shared.DTO.Response;
 
 namespace BookStoreApp.Shared.Services.Authors
 {
     public interface IAuthorsService
     {
-        Task<Response<List<Author>>> GetAuthors();
+        Task<Response<VirtualizedResponse<AuthorReadOnlyDTO>>> GetAuthors(QueryParameters queryParameters);
 
         Task<Response<Author>> GetAuthor(int id);
 

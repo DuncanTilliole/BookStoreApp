@@ -2,15 +2,6 @@
 @attribute [AllowAnonymous]
 @rendermode InteractiveServer
 
-@inject NavigationManager NavigationManager
-@inject IAuthenticationService AuthService
-
-@using System.Net.Http
-@using System.Text.Json
-@using System.Text
-@using BookStoreApp.Shared.Services
-@using Microsoft.AspNetCore.Authorization
-
 <PageTitle>Login</PageTitle>
 
 <h1>Login</h1>
@@ -35,20 +26,3 @@
         <button class="btn btn-primary" type="submit">Login</button>
     </EditForm>
 </div>
-
-@code {
-    private HttpClient httpClient = new HttpClient();
-    private string RegistrationError = null!;
-    private UserToLoginDTO LoginModel { get; set; } = new UserToLoginDTO();
-
-    private async Task HandleLogin()
-    {
-        Response<string> response = await AuthService.AuthenticateAsync(LoginModel);
-
-        if (response.Success)
-            NavigationManager.NavigateTo("");
-        else
-            RegistrationError = response.Message;
-    }
-
-}

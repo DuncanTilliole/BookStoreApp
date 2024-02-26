@@ -1,6 +1,8 @@
 ﻿using Blazored.LocalStorage;
 using BookStoreApp.Shared.Bases;
+using BookStoreApp.Shared.DTO.Response;
 using Newtonsoft.Json;
+using System.Security.Policy;
 using System.Text;
 
 namespace BookStoreApp.Shared.Services.Authors
@@ -14,30 +16,39 @@ namespace BookStoreApp.Shared.Services.Authors
             _httpClient = httpClient;
         }
 
-        public async Task<Response<List<Author>>> GetAuthors()
+        public async Task<Response<VirtualizedResponse<AuthorReadOnlyDTO>>> GetAuthors(QueryParameters queryParameters)
         {
             try
             {
                 await GetBearerToken();
-                var response = await _httpClient.GetAsync("https://localhost:7003/Authors");
+
+                // Construct the URL with query parameters
+                var uriBuilder = new UriBuilder("https://localhost:7003/Authors");
+                if (queryParameters != null)
+                {
+                    var queryString = queryParameters.ToQueryString();
+                    uriBuilder.Query = queryString;
+                }
+
+                var response = await _httpClient.GetAsync(uriBuilder.Uri);
                 string responseBody = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
                 {
-                    IEnumerable<Author> authors = JsonConvert.DeserializeObject<IEnumerable<Author>>(responseBody)!;
+                    VirtualizedResponse<AuthorReadOnlyDTO> virtualizedResponse = JsonConvert.DeserializeObject<VirtualizedResponse<AuthorReadOnlyDTO>>(responseBody)!;
 
-                    return new Response<List<Author>>
+                    return new Response<VirtualizedResponse<AuthorReadOnlyDTO>>
                     {
-                        Datas = authors.ToList(),
+                        Datas = virtualizedResponse,
                         Success = true,
                     };
                 }
-                else return new Response<List<Author>> { Success = false };
+                else return new Response<VirtualizedResponse<AuthorReadOnlyDTO>> { Success = false };
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"ERROR WRITING : {ex}");
-                return new Response<List<Author>> { Success = false };
+                return new Response<VirtualizedResponse<AuthorReadOnlyDTO>> { Success = false };
             }
         }
 

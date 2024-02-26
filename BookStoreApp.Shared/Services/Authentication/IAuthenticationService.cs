@@ -1,5 +1,4 @@
-﻿using BookStoreApp.Shared.Bases;
-using BookStoreApp.Shared.DTO.Response;
+﻿using BookStoreApp.Shared.DTO.Response;
 
 namespace BookStoreApp.Shared.Services.Authentication
 {

@@ -4,6 +4,6 @@ namespace BookStoreApp.API.DTO.Author
 {
     public class AuthorDetailsDTO : AuthorReadOnlyDTO
     {
-        public List<BookReadOnlyDTO> Books { get; set; }
+        public List<BookReadOnlyDTO> Books { get; set; } = [];
     }
 }

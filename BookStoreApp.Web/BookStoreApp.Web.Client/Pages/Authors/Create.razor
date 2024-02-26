@@ -2,11 +2,9 @@
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = Roles.Admin)]
 
-@inject IAuthorsService authorsService
-@inject NavigationManager NavigationManager
-
 <h3>Create a new author</h3>
-<EditForm Model="Author" OnValidSubmit="HandleCreateAuthor">
+
+<EditForm Model="Author" OnValidSubmit="HandleCreate">
     <DataAnnotationsValidator/>
     <ValidationSummary/>
     <div class="form-group">
@@ -24,15 +22,3 @@
     <br />
     <button class="btn btn-primary" type="submit">Create author</button>
 </EditForm>
-
-@code {
-    private AuthorCreateDTO Author = new AuthorCreateDTO();
-
-    private async Task HandleCreateAuthor()
-    {
-        Response<int> response = await authorsService.CreateAuthor(Author);
-
-        if (response.Success)
-            NavigationManager.NavigateTo("/authors");
-    }
-}

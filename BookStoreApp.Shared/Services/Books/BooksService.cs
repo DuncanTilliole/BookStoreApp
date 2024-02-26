@@ -1,5 +1,6 @@
 ﻿using Blazored.LocalStorage;
 using BookStoreApp.Shared.Bases;
+using BookStoreApp.Shared.DTO.Response;
 using Newtonsoft.Json;
 using System.Text;
 
@@ -14,30 +15,40 @@ namespace BookStoreApp.Shared.Services.Books
             _httpClient = httpClient;
         }
 
-        public async Task<Response<List<BookReadOnlyDTO>>> Get()
+        public async Task<Response<VirtualizedResponse<BookReadOnlyDTO>>> Get(QueryParameters queryParameters)
         {
             try
             {
                 await GetBearerToken();
-                var response = await _httpClient.GetAsync("https://localhost:7003/Books");
+
+                // Construct the URL with query parameters
+                var uriBuilder = new UriBuilder("https://localhost:7003/Books");
+                if (queryParameters != null)
+                {
+                    var queryString = queryParameters.ToQueryString();
+                    uriBuilder.Query = queryString;
+                }
+
+                var response = await _httpClient.GetAsync(uriBuilder.Uri);
                 string responseBody = await response.Content.ReadAsStringAsync();
+
 
                 if (response.IsSuccessStatusCode)
                 {
-                    IEnumerable<BookReadOnlyDTO> books = JsonConvert.DeserializeObject<IEnumerable<BookReadOnlyDTO>>(responseBody)!;
+                    VirtualizedResponse<BookReadOnlyDTO> virtualizedResponse = JsonConvert.DeserializeObject<VirtualizedResponse<BookReadOnlyDTO>>(responseBody)!;
 
-                    return new Response<List<BookReadOnlyDTO>>
+                    return new Response<VirtualizedResponse<BookReadOnlyDTO>>
                     {
-                        Datas = books.ToList(),
+                        Datas = virtualizedResponse,
                         Success = true,
                     };
                 }
-                else return new Response<List<BookReadOnlyDTO>> { Success = false };
+                else return new Response<VirtualizedResponse<BookReadOnlyDTO>> { Success = false };
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"ERROR WRITING : {ex}");
-                return new Response<List<BookReadOnlyDTO>> { Success = false };
+                return new Response<VirtualizedResponse<BookReadOnlyDTO>> { Success = false };
             }
         }
 

@@ -4,7 +4,6 @@ using Blazored.LocalStorage;
 using BookStoreApp.Shared.DTO.Response;
 using Microsoft.AspNetCore.Components.Authorization;
 using BookStoreApp.Shared.Providers;
-using BookStoreApp.Shared.Bases;
 
 namespace BookStoreApp.Shared.Services.Authentication
 {

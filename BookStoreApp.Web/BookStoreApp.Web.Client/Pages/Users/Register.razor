@@ -1,12 +1,5 @@
 ﻿@page "/register"
 @rendermode InteractiveServer
-@inject NavigationManager NavigationManager
-@inject IAuthenticationService AuthService
-
-@using System.Net.Http
-@using System.Text.Json
-@using System.Text
-@using BookStoreApp.Shared.Services
 
 <PageTitle>Register new account</PageTitle>
 
@@ -44,26 +37,3 @@
         <button class="btn btn-primary" type="submit">Sign in</button>
     </EditForm>
 </div>
-
-@code {
-    private HttpClient httpClient = new HttpClient();
-    private string registrationError = string.Empty;
-    private UserToRegisterDTO RegistrationModel { get; set; } = new UserToRegisterDTO();
-
-    /**
-     * Registration of a new user
-    */
-    private async Task HandleRegistration()
-    {
-        RegistrationModel.UserName = RegistrationModel.Email;
-        RegistrationModel.Role = "User";
-
-        Response<string> response = await AuthService.RegisterAsync(RegistrationModel);
-
-        if (response.Success)
-            NavigationManager.NavigateTo("/login");
-        else
-            registrationError = response.Message;
-    }
-
-}

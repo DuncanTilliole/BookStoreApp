@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BookStoreApp.Shared.Bases
+namespace BookStoreApp.Shared.DTO.Response
 {
     public class Response<T>
     {

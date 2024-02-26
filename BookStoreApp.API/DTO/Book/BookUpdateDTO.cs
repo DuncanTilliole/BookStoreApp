@@ -6,27 +6,27 @@ namespace BookStoreApp.API.DTO.Book
     {
         [Required]
         [StringLength(50)]
-        public string? Title { get; set; }
+        public required string Title { get; set; }
 
         [Required]
         [Range(1800, int.MaxValue)]
-        public int? Year { get; set; }
+        public required int Year { get; set; }
 
         [Required]
-        public string Isbn { get; set; } = null!;
+        public required string Isbn { get; set; }
 
         [Required]
         [StringLength(250, MinimumLength = 10)]
-        public string? Summary { get; set; }
+        public required string Summary { get; set; }
+
+        [Required]
+        [Range(0, int.MaxValue)]
+        public required decimal Price { get; set; }
 
         public string? Image { get; set; }
 
         public string? ImageData { get; set; }
 
         public string? OriginalImageName { get; set; }
-
-        [Required]
-        [Range(0, int.MaxValue)]
-        public decimal? Price { get; set; }
     }
 }
